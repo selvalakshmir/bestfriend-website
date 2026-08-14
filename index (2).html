@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>For My Best Friend</title>
+<style>
+  :root {
+    --midnight: #0d0d0d;
+    --midnight-deep: #000000;
+    --plum: #2a1f0e;
+    --gold: #d4af37;
+    --gold-soft: #f5e1a4;
+    --rose: #e8c874;
+    --paper: #fdf6e3;
+    --ink: #2b2410;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% -10%, var(--plum) 0%, var(--midnight) 40%, var(--midnight-deep) 100%);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    color: var(--paper);
+    overflow-x: hidden;
+  }
+
+  .sky {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.85), inset 0 0 2px rgba(212,175,55,0.4);
+  }
+
+  .star {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--gold-soft);
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: twinkle 3s ease-in-out infinite;
+    box-shadow: 0 0 6px 1px rgba(245, 225, 164, 0.6);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.4); }
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 20px;
+  }
+
+  .eyebrow {
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--gold);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin-bottom: 20px;
+    opacity: 0.85;
+  }
+
+  .headline {
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 400;
+    line-height: 1.2;
+    max-width: 720px;
+    margin: 0 0 44px;
+    font-style: italic;
+    background: linear-gradient(180deg, var(--gold-soft) 0%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .envelope-wrap {
+    position: relative;
+    width: 220px;
+    height: 150px;
+    cursor: pointer;
+    user-select: none;
+    perspective: 1000px;
+  }
+
+  .envelope-wrap:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 6px;
+  }
+
+  .envelope-body {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 6px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(212,175,55,0.08);
+    transition: transform 0.4s ease;
+  }
+
+  .envelope-wrap:hover .envelope-body {
+    transform: translateY(-6px);
+    box-shadow: 0 26px 50px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.18);
+  }
+
+  .flap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0;
+    border-left: 110px solid transparent;
+    border-right: 110px solid transparent;
+    border-top: 90px solid #141414;
+    transform-origin: top;
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+    z-index: 3;
+  }
+
+  .envelope-wrap.open .flap {
+    transform: rotateX(180deg);
+  }
+
+  .seal {
+    position: absolute;
+    top: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(160deg, var(--gold-soft), var(--gold));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: bold;
+    box-shadow: 0 4px 14px rgba(212,175,55,0.4);
+    z-index: 4;
+    transition: opacity 0.3s ease;
+  }
+
+  .envelope-wrap.open .seal {
+    opacity: 0;
+  }
+
+  .hint {
+    margin-top: 22px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--gold-soft);
+    opacity: 0.75;
+  }
+
+  .envelope-wrap.open ~ .hint,
+  .stage.revealed .hint {
+    display: none;
+  }
+
+  .message {
+    max-width: 620px;
+    margin-top: 44px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .stage.revealed .message {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .message-card {
+    background:
+      radial-gradient(circle at 20% 15%, rgba(212,175,55,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(212,175,55,0.05) 0%, transparent 50%),
+      linear-gradient(160deg, #161616 0%, #0a0a0a 100%);
+    color: var(--gold-soft);
+    border-radius: 4px;
+    padding: 48px 44px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.5), inset 0 0 60px rgba(212,175,55,0.04);
+    text-align: left;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .message-card:active {
+    transform: scale(0.99);
+  }
+
+  .message-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .message-card::after {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .message-card h2 {
+    font-size: 27px;
+    font-style: italic;
+    font-weight: 400;
+    margin: 0 0 18px;
+    color: var(--gold);
+  }
+
+  .message-card p {
+    font-size: 17px;
+    line-height: 1.8;
+    margin: 0 0 16px;
+    color: rgba(253, 246, 227, 0.88);
+  }
+
+  .message-card strong,
+  .message-card em {
+    color: var(--gold-soft);
+  }
+
+  .signature {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.8;
+    margin-top: 24px;
+  }
+
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 8px;
+    height: 14px;
+    opacity: 0.9;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .heart-particle {
+    position: fixed;
+    bottom: -20px;
+    font-size: 20px;
+    z-index: 5;
+    pointer-events: none;
+    color: var(--rose);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) translateX(0) scale(0.6);
+      opacity: 0;
+    }
+    15% {
+      opacity: 1;
+      transform: translateY(-10vh) translateX(var(--drift)) scale(1);
+    }
+    100% {
+      transform: translateY(-95vh) translateX(calc(var(--drift) * 2)) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(105vh) rotate(540deg);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flap, .message, .envelope-body, .star, .heart-particle { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sky" id="sky"></div>
+
+<div class="stage" id="stage">
+  <p class="eyebrow">A little something</p>
+  <h1 class="headline">Hey Yogi &mdash; you are my first friend and best friend in my life.</h1>
+
+  <div class="envelope-wrap" id="envelope" tabindex="0" role="button" aria-label="Open the envelope to reveal a surprise message for Yogi">
+    <div class="flap"></div>
+    <div class="seal">&hearts;</div>
+    <div class="envelope-body"></div>
+  </div>
+
+  <p class="hint">tap the envelope</p>
+
+  <div class="message" id="message">
+    <div class="message-card">
+      <h2>To Yogi,</h2>
+      <p>
+        <strong>You are my first friend in this life, and also my best friend.</strong> And
+        I'm not just saying that casually&mdash;I'm saying it straight from my
+        heart. I'm truly thankful for everything you've been through with
+        me, from our childhood until now. I've laughed more with you and
+        your family than with anyone else in this world.
+      </p>
+      <p>
+        From the day we became friends as kids until this very moment, I've
+        never seen even a little bit of pride or attitude in you. No matter
+        what situation I was in, you never left me alone. You've always
+        been there for me.
+      </p>
+      <p>
+        I still remember the day our families had a fight about the water
+        flow between our houses. That situation broke something inside me.
+        I couldn't even talk to you for three long years, and I cried more
+        than I can explain. When I finally got the chance to talk to you
+        again, the first thing I noticed was your hand. It was bandaged. I
+        cried even more that day because you were hurt.
+      </p>
+      <p>
+        When I joined college and started staying in the hostel, you were
+        the one friend I told everyone about. Even now, whenever someone
+        asks me about you, I never just say, &ldquo;Yogi is my friend.&rdquo;
+        I always say, &ldquo;He's my best friend.&rdquo;
+      </p>
+      <p>
+        There were so many times when my family was going through difficult
+        situations&mdash;fight after fight and one problem after another. But
+        whenever I saw you, everything would disappear for a while. Just
+        being around you was enough to make me feel better.
+      </p>
+      <p>
+        That's why, after I joined college and we couldn't spend time
+        together like before, I missed you so much. Sometimes, I even cried
+        wishing that we could go back to those days.
+      </p>
+      <p>
+        Even now, when I'm in the hostel and I see my roommates laughing and
+        talking with their friends on video calls for hours, I sometimes
+        feel that same loneliness. And in those moments, the only person I
+        think about is you.
+      </p>
+      <p>
+        You never get angry with me. You never made me feel like I had to
+        prove that I was still your friend. You never doubted our
+        friendship, and honestly, I miss that so much.
+      </p>
+      <p>
+        <strong>Ni epavumae kopiduvilla, en friend ah irunthaa va nu &mdash; atha na
+        romba miss panuren.</strong>
+      </p>
+      <p>
+        I don't know if it's because of someone's evil eye or simply because
+        life is taking us in different directions. We used to sit together
+        and talk face to face, and now most of our conversations are
+        through calls and texts.
+      </p>
+      <p>
+        But I've decided something, Yogi. From now on, I'm going to make
+        time to meet you in person again. I want us to sit together, talk
+        for hours, laugh like we used to, and create those memories again.
+      </p>
+      <p>
+        Since <strong>15.12.2017</strong>, through everything, you've stayed by my
+        side. That kind of friendship is rare.
+      </p>
+      <p><strong>And that friendship is you.</strong></p>
+      <div class="signature">&mdash; Ice</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Scatter a few background stars
+  const sky = document.getElementById('sky');
+  for (let i = 0; i < 40; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = (Math.random() * 3) + 's';
+    sky.appendChild(star);
+  }
+
+  const envelope = document.getElementById('envelope');
+  const stage = document.getElementById('stage');
+  let opened = false;
+
+  function openEnvelope() {
+    if (opened) return;
+    opened = true;
+    envelope.classList.add('open');
+    const rect = envelope.getBoundingClientRect();
+    launchHearts(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+    setTimeout(() => {
+      stage.classList.add('revealed');
+      launchConfetti();
+    }, 500);
+  }
+
+  envelope.addEventListener('click', openEnvelope);
+  envelope.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openEnvelope();
+    }
+  });
+
+  const messageCard = document.querySelector('.message-card');
+  messageCard.addEventListener('click', (e) => {
+    launchHearts(e.clientX, e.clientY);
+  });
+
+  function launchHearts(originX, originY) {
+    const symbols = ['\u2764\ufe0f', '\ud83d\udc96', '\ud83d\udc95'];
+
+    for (let i = 0; i < 18; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'heart-particle';
+      heart.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      heart.style.left = (originX + (Math.random() * 80 - 40)) + 'px';
+      heart.style.bottom = (window.innerHeight - originY) + 'px';
+      heart.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+      heart.style.fontSize = (14 + Math.random() * 14) + 'px';
+      heart.style.animation = `floatUp ${2 + Math.random() * 1.5}s ease-out forwards`;
+      heart.style.animationDelay = (Math.random() * 0.4) + 's';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 4000);
+    }
+  }
+
+  function launchConfetti() {
+    const colors = ['#d4af37', '#f5e1a4', '#e8c874', '#fff4d6'];
+    for (let i = 0; i < 60; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animation = `fall ${2.5 + Math.random() * 2}s ease-in forwards`;
+      piece.style.animationDelay = (Math.random() * 0.6) + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 5000);
+    }
+  }
+</script>
+
+</body>
+</html>
